@@ -5,7 +5,9 @@ import (
 	"io"
 	"mime/multipart"
 	"os"
+	"path/filepath"
 
+	"github.com/dhelic98/scoreplay-api/cmd/config"
 	"github.com/google/uuid"
 )
 
@@ -16,9 +18,11 @@ func NewFileService() *FileService {
 	return &FileService{}
 }
 
-func (f *FileService) UploadFile(file *multipart.File) (string, error) {
+func (fileService *FileService) UploadFile(file *multipart.File, fileHeader *multipart.FileHeader) (string, error) {
 	fileID := uuid.New().String()
-	filePath := f.GetFilePath(fileID)
+	fileExt := filepath.Ext(fileHeader.Filename)
+	fullFileName := fmt.Sprintf("%s%s", fileID, fileExt)
+	filePath := fileService.GetFilePath(fullFileName)
 
 	fileBytes, err := io.ReadAll(*file)
 	if err != nil {
@@ -29,13 +33,17 @@ func (f *FileService) UploadFile(file *multipart.File) (string, error) {
 		return "", err
 	}
 
-	FILE_HOST_URL := os.Getenv("FILE_HOST_URL")
+	FILE_HOST_URL := config.GetConfigInstance().FileHostUrl
 
-	fileUrl := fmt.Sprintf("%s/v1/file/%s", FILE_HOST_URL, fileID)
+	fileUrl := fmt.Sprintf("%s/file/%s", FILE_HOST_URL, fullFileName)
 
 	return fileUrl, nil
 }
 
-func (f *FileService) GetFilePath(idStr string) string {
-	return fmt.Sprintf("./uploads/%s.jpg", idStr)
+func (fileService *FileService) GetFilePath(fileName string) string {
+	return fmt.Sprintf("./uploads/%s", fileName)
+}
+
+func (fileService *FileService) IsFileExtensionAllowed(fileExt string) {
+
 }

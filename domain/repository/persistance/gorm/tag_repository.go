@@ -17,30 +17,30 @@ func NewPostgresSQLTagRepository(db *gorm.DB) *TagRepository {
 }
 
 // Write
-func (r *TagRepository) CreateTag(ctx context.Context, tag *entity.Tag) error {
-	return r.DB.Create(tag).Error
+func (repository *TagRepository) CreateTag(ctx context.Context, tag *entity.Tag) error {
+	return repository.DB.Create(tag).Error
 }
 
 // Read
-func (r *TagRepository) GetAllTags(ctx context.Context) ([]*entity.Tag, error) {
+func (repository *TagRepository) GetAllTags(ctx context.Context) ([]*entity.Tag, error) {
 	var tags []*entity.Tag
-	if err := r.DB.Find(&tags).Error; err != nil {
+	if err := repository.DB.Find(&tags).Error; err != nil {
 		return nil, err
 	}
 	return tags, nil
 }
 
-func (r *TagRepository) GetTagById(ctx context.Context, id uuid.UUID) (*entity.Tag, error) {
+func (repository *TagRepository) GetTagById(ctx context.Context, id uuid.UUID) (*entity.Tag, error) {
 	var tag entity.Tag
-	if err := r.DB.First(&tag, "id = ?", id).Error; err != nil {
+	if err := repository.DB.First(&tag, "id = ?", id).Error; err != nil {
 		return nil, err
 	}
 	return &tag, nil
 }
 
-func (r *TagRepository) GetByIDs(ctx context.Context, ids []uuid.UUID) ([]entity.Tag, error) {
+func (repository *TagRepository) GetByIDs(ctx context.Context, ids []uuid.UUID) ([]entity.Tag, error) {
 	var tags []entity.Tag
-	if err := r.DB.Where("id IN ?", ids).Find(&tags).Error; err != nil {
+	if err := repository.DB.Where("id IN ?", ids).Find(&tags).Error; err != nil {
 		return nil, err
 	}
 	return tags, nil

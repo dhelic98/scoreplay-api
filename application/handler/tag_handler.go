@@ -2,10 +2,12 @@ package handler
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 
 	"github.com/dhelic98/scoreplay-api/application/dto"
 	"github.com/dhelic98/scoreplay-api/application/service"
+	"github.com/dhelic98/scoreplay-api/interface/validator"
 	"github.com/google/uuid"
 )
 
@@ -14,14 +16,20 @@ type TagHandler struct {
 }
 
 func (handler *TagHandler) CreateTagHandler(w http.ResponseWriter, r *http.Request) {
-	var dto dto.CreateTagDTO
-	if err := json.NewDecoder(r.Body).Decode(&dto); err != nil {
-		http.Error(w, "Invalid input", http.StatusBadRequest)
+	var createTagdto dto.CreateTagDTO
+
+	if err := json.NewDecoder(r.Body).Decode(&createTagdto); err != nil {
+		http.Error(w, "Malformed JSON input", http.StatusBadRequest)
 		return
 	}
 	defer r.Body.Close()
 
-	if err := handler.Service.CreateTag(r.Context(), dto); err != nil {
+	if err := validator.GetValidatorInstance().Struct(createTagdto); err != nil {
+		http.Error(w, fmt.Sprintf("%v", err), http.StatusBadRequest)
+		return
+	}
+
+	if err := handler.Service.CreateTag(r.Context(), createTagdto); err != nil {
 		http.Error(w, "Failed to create tag", http.StatusInternalServerError)
 		return
 	}
@@ -32,7 +40,7 @@ func (handler *TagHandler) CreateTagHandler(w http.ResponseWriter, r *http.Reque
 func (handler *TagHandler) GetAllTagsHandler(w http.ResponseWriter, r *http.Request) {
 	tags, err := handler.Service.GetAllTags(r.Context())
 	if err != nil {
-		http.Error(w, "Tag not found", http.StatusNotFound)
+		http.Error(w, "Tags not found", http.StatusInternalServerError)
 		return
 	}
 

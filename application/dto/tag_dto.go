@@ -6,12 +6,7 @@ import (
 )
 
 type CreateTagDTO struct {
-	Name string `json:"name"`
-}
-
-type UpdateTagDTO struct {
-	ID   uuid.UUID `json:"id"`
-	Name string    `json:"name"`
+	Name string `json:"name" validate:"required"`
 }
 
 type GetTagDTO struct {

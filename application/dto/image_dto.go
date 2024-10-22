@@ -1,17 +1,9 @@
 package dto
 
 import (
-	"mime/multipart"
-
 	"github.com/dhelic98/scoreplay-api/domain/entity"
 	"github.com/google/uuid"
 )
-
-type CreateImageRequestForm struct {
-	Name  string                `json:"name" form:"name"`
-	Image *multipart.FileHeader `json:"image" form:"image"`
-	Tags  []uuid.UUID           `json:"tags" form:"tags"`
-}
 
 type CreateImageDTO struct {
 	Name string      `json:"name"`

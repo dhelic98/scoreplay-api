@@ -5,12 +5,13 @@ import (
 	"net/http"
 
 	"github.com/dhelic98/scoreplay-api/application/router"
+	"github.com/dhelic98/scoreplay-api/cmd/config"
 	customhttp "github.com/dhelic98/scoreplay-api/interface/http"
 )
 
 func main() {
-	config := NewConfig()
-	db := InitiateDatabaseConnection(config.DBConnectionString)
+	config := config.GetConfigInstance()
+	db := InitiateDatabaseConnection()
 	router := router.SetupRoutes(db)
 
 	server := http.Server{

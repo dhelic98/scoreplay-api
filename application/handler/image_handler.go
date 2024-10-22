@@ -3,9 +3,11 @@ package handler
 import (
 	"encoding/json"
 	"net/http"
+	"path/filepath"
 
 	"github.com/dhelic98/scoreplay-api/application/dto"
 	"github.com/dhelic98/scoreplay-api/application/service"
+	"github.com/dhelic98/scoreplay-api/interface/enum"
 	"github.com/google/uuid"
 )
 
@@ -23,6 +25,10 @@ func (handler *ImageHandler) CreateImageHandler(w http.ResponseWriter, r *http.R
 	}
 
 	name := r.FormValue("name")
+	if len(name) < 1 {
+		http.Error(w, "Media Name is required", http.StatusBadRequest)
+		return
+	}
 
 	file, fileHeader, err := r.FormFile("image")
 	if err != nil || fileHeader == nil {
@@ -30,6 +36,12 @@ func (handler *ImageHandler) CreateImageHandler(w http.ResponseWriter, r *http.R
 		return
 	}
 	defer file.Close()
+
+	fileExt := filepath.Ext(fileHeader.Filename)
+	if enum.IsAllowed(fileExt) == false {
+		http.Error(w, "File format unsupported", http.StatusBadRequest)
+		return
+	}
 
 	tagsJSONString := r.FormValue("tags")
 	if tagsJSONString == "" {
@@ -43,7 +55,7 @@ func (handler *ImageHandler) CreateImageHandler(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	fileUrl, err := handler.FileService.UploadFile(&file)
+	fileUrl, err := handler.FileService.UploadFile(&file, fileHeader)
 	if err != nil {
 		http.Error(w, "Failed to save image to server", http.StatusInternalServerError)
 		return

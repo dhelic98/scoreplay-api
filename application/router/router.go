@@ -1,10 +1,12 @@
 package router
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/dhelic98/scoreplay-api/application/handler"
 	"github.com/dhelic98/scoreplay-api/application/service"
+	"github.com/dhelic98/scoreplay-api/cmd/config"
 	persistance "github.com/dhelic98/scoreplay-api/domain/repository/persistance/gorm"
 	"gorm.io/gorm"
 )
@@ -31,9 +33,10 @@ func SetupRoutes(db *gorm.DB) *http.ServeMux {
 	registerImageRoutes(router, imageHandler)
 	registerFileRoutes(router, fileHandler)
 
-	//Adding v1 prefix for versioning
-	v1 := http.NewServeMux()
-	v1.Handle("/v1/", http.StripPrefix("/v1", router))
+	//Adding versionRouter prefix for versioning
+	versionRouter := http.NewServeMux()
+	versionRouter.Handle(fmt.Sprintf("/%s/", config.GetConfigInstance().CurrentAPIVersion),
+		http.StripPrefix(fmt.Sprintf("/%s", config.GetConfigInstance().CurrentAPIVersion), router))
 
-	return v1
+	return versionRouter
 }
