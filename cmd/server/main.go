@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/dhelic98/scoreplay-api/infrastructure/router"
+	"github.com/dhelic98/scoreplay-api/application/router"
 	customhttp "github.com/dhelic98/scoreplay-api/interface/http"
 )
 

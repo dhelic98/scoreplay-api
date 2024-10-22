@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"encoding/json"
 
 	"github.com/dhelic98/scoreplay-api/application/dto"
 	"github.com/dhelic98/scoreplay-api/domain/entity"
@@ -50,4 +51,24 @@ func (tagService *TagService) GetTagById(ctx context.Context, id uuid.UUID) (*dt
 		ID:   tag.ID,
 		Name: tag.Name,
 	}, nil
+}
+
+func (tagService *TagService) ParseMultipartFormToUUID(tagsJSONString string) ([]uuid.UUID, error) {
+	var tags []string
+	err := json.Unmarshal([]byte(tagsJSONString), &tags)
+	if err != nil {
+		return nil, err
+	}
+
+	var tagIDs []uuid.UUID = make([]uuid.UUID, len(tags))
+	for i, tagIDStr := range tags {
+		tagID, err := uuid.Parse(tagIDStr)
+		if err != nil {
+			return nil, err
+		}
+		tagIDs[i] = tagID
+	}
+
+	return tagIDs, nil
+
 }

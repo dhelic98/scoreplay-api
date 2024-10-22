@@ -18,7 +18,7 @@ func NewImageService(imageRepository repository.ImageRepository) *ImageService {
 	return &ImageService{Respository: imageRepository}
 }
 
-func (imageService *ImageService) CreateImage(ctx context.Context, imageDTO dto.CreateImageDTO) error {
+func (imageService *ImageService) CreateImage(ctx context.Context, imageDTO *dto.CreateImageDTO) error {
 	tags := make([]entity.Tag, len(imageDTO.Tags))
 	for i, tagUUID := range imageDTO.Tags {
 		tags[i] = entity.Tag{

@@ -2,10 +2,7 @@ package handler
 
 import (
 	"encoding/json"
-	"fmt"
-	"io"
 	"net/http"
-	"os"
 
 	"github.com/dhelic98/scoreplay-api/application/dto"
 	"github.com/dhelic98/scoreplay-api/application/service"
@@ -13,7 +10,9 @@ import (
 )
 
 type ImageHandler struct {
-	Service *service.ImageService
+	ImageService *service.ImageService
+	FileService  *service.FileService
+	TagService   *service.TagService
 }
 
 func (handler *ImageHandler) CreateImageHandler(w http.ResponseWriter, r *http.Request) {
@@ -32,51 +31,29 @@ func (handler *ImageHandler) CreateImageHandler(w http.ResponseWriter, r *http.R
 	}
 	defer file.Close()
 
-	tagsJSON := r.FormValue("tags")
-	if tagsJSON == "" {
+	tagsJSONString := r.FormValue("tags")
+	if tagsJSONString == "" {
 		http.Error(w, "Tags are required", http.StatusBadRequest)
 		return
 	}
 
-	var tags []string
-	err = json.Unmarshal([]byte(tagsJSON), &tags)
+	tagIDs, err := handler.TagService.ParseMultipartFormToUUID(tagsJSONString)
 	if err != nil {
-		http.Error(w, "Failed to Unmarshal", http.StatusBadRequest)
+		http.Error(w, "Failed to parse tags", http.StatusInternalServerError)
 		return
 	}
 
-	var tagIDs []uuid.UUID
-	for _, tagIDStr := range tags {
-		tagID, err := uuid.Parse(tagIDStr)
-		if err != nil {
-			http.Error(w, "Invalid tag ID", http.StatusBadRequest)
-			return
-		}
-		tagIDs = append(tagIDs, tagID)
-	}
-
-	fileID := uuid.New().String()
-	filePath := "./uploads/" + fileID + ".jpg"
-	fileBytes, err := io.ReadAll(file)
+	fileUrl, err := handler.FileService.UploadFile(&file)
 	if err != nil {
-		http.Error(w, "Failed to read file data", http.StatusInternalServerError)
-		return
-	}
-	err = os.WriteFile(filePath, fileBytes, os.ModePerm)
-	if err != nil {
-		http.Error(w, "Failed to save image file", http.StatusInternalServerError)
+		http.Error(w, "Failed to save image to server", http.StatusInternalServerError)
 		return
 	}
 
-	FILE_HOST_URL := os.Getenv("FILE_HOST_URL")
-
-	fileUrl := fmt.Sprintf("%s%s/file/%s", FILE_HOST_URL, r.URL, fileID)
-	createImageDTO := dto.CreateImageDTO{
+	err = handler.ImageService.CreateImage(r.Context(), &dto.CreateImageDTO{
 		Name: name,
 		URL:  fileUrl,
 		Tags: tagIDs,
-	}
-	err = handler.Service.CreateImage(r.Context(), createImageDTO)
+	})
 	if err != nil {
 		http.Error(w, "Failed to create image", http.StatusInternalServerError)
 		return
@@ -86,7 +63,7 @@ func (handler *ImageHandler) CreateImageHandler(w http.ResponseWriter, r *http.R
 }
 
 func (handler *ImageHandler) GetAllImagesHandler(w http.ResponseWriter, r *http.Request) {
-	images, err := handler.Service.GetAllImages(r.Context())
+	images, err := handler.ImageService.GetAllImages(r.Context())
 	if err != nil {
 		http.Error(w, "Images not found", http.StatusNotFound)
 		return
@@ -104,7 +81,7 @@ func (handler *ImageHandler) GetImageByIDHandler(w http.ResponseWriter, r *http.
 		return
 	}
 
-	image, err := handler.Service.GetImageById(r.Context(), id)
+	image, err := handler.ImageService.GetImageById(r.Context(), id)
 	if err != nil {
 		http.Error(w, "Image with ID provided not found ", http.StatusNotFound)
 		return
@@ -121,7 +98,7 @@ func (handler *ImageHandler) SearchByTag(w http.ResponseWriter, r *http.Request)
 		http.Error(w, "No tag provided", http.StatusBadRequest)
 	}
 
-	images, err := handler.Service.SearchImagesByTagName(r.Context(), tagStr)
+	images, err := handler.ImageService.SearchImagesByTagName(r.Context(), tagStr)
 	if err != nil {
 		http.Error(w, "Images not found with tag name provided", http.StatusNotFound)
 		return
@@ -129,17 +106,4 @@ func (handler *ImageHandler) SearchByTag(w http.ResponseWriter, r *http.Request)
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(images)
-}
-
-func (h *ImageHandler) ServeImageFile(w http.ResponseWriter, r *http.Request) {
-	idStr := r.PathValue("fileID")
-
-	filePath := "./uploads/" + idStr + ".jpg"
-
-	if _, err := os.Stat(filePath); os.IsNotExist(err) {
-		http.Error(w, "File not found", http.StatusNotFound)
-		return
-	}
-
-	http.ServeFile(w, r, filePath)
 }
