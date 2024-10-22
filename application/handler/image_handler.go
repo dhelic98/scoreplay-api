@@ -12,11 +12,11 @@ import (
 	"github.com/google/uuid"
 )
 
-type MediaHandler struct {
-	Service *service.MediaService
+type ImageHandler struct {
+	Service *service.ImageService
 }
 
-func (handler *MediaHandler) CreateImageHandler(w http.ResponseWriter, r *http.Request) {
+func (handler *ImageHandler) CreateImageHandler(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseMultipartForm(10 << 20)
 	if err != nil {
 		http.Error(w, "Failed to parse form", http.StatusBadRequest)
@@ -24,6 +24,7 @@ func (handler *MediaHandler) CreateImageHandler(w http.ResponseWriter, r *http.R
 	}
 
 	name := r.FormValue("name")
+
 	file, fileHeader, err := r.FormFile("image")
 	if err != nil || fileHeader == nil {
 		http.Error(w, "Image file is required", http.StatusBadRequest)
@@ -31,9 +32,21 @@ func (handler *MediaHandler) CreateImageHandler(w http.ResponseWriter, r *http.R
 	}
 	defer file.Close()
 
+	tagsJSON := r.FormValue("tags")
+	if tagsJSON == "" {
+		http.Error(w, "Tags are required", http.StatusBadRequest)
+		return
+	}
+
+	var tags []string
+	err = json.Unmarshal([]byte(tagsJSON), &tags)
+	if err != nil {
+		http.Error(w, "Failed to Unmarshal", http.StatusBadRequest)
+		return
+	}
+
 	var tagIDs []uuid.UUID
-	tagIDStrs := r.Form["tags"]
-	for _, tagIDStr := range tagIDStrs {
+	for _, tagIDStr := range tags {
 		tagID, err := uuid.Parse(tagIDStr)
 		if err != nil {
 			http.Error(w, "Invalid tag ID", http.StatusBadRequest)
@@ -57,7 +70,7 @@ func (handler *MediaHandler) CreateImageHandler(w http.ResponseWriter, r *http.R
 
 	FILE_HOST_URL := os.Getenv("FILE_HOST_URL")
 
-	fileUrl := fmt.Sprintf("%s/images/file/%s", FILE_HOST_URL, fileID)
+	fileUrl := fmt.Sprintf("%s%s/file/%s", FILE_HOST_URL, r.URL, fileID)
 	createImageDTO := dto.CreateImageDTO{
 		Name: name,
 		URL:  fileUrl,
@@ -72,7 +85,7 @@ func (handler *MediaHandler) CreateImageHandler(w http.ResponseWriter, r *http.R
 	w.WriteHeader(http.StatusCreated)
 }
 
-func (handler *MediaHandler) GetAllImagesHandler(w http.ResponseWriter, r *http.Request) {
+func (handler *ImageHandler) GetAllImagesHandler(w http.ResponseWriter, r *http.Request) {
 	images, err := handler.Service.GetAllImages(r.Context())
 	if err != nil {
 		http.Error(w, "Images not found", http.StatusNotFound)
@@ -83,7 +96,7 @@ func (handler *MediaHandler) GetAllImagesHandler(w http.ResponseWriter, r *http.
 	json.NewEncoder(w).Encode(images)
 }
 
-func (handler *MediaHandler) GetImageByIDHandler(w http.ResponseWriter, r *http.Request) {
+func (handler *ImageHandler) GetImageByIDHandler(w http.ResponseWriter, r *http.Request) {
 	idStr := r.PathValue("id")
 	id, err := uuid.Parse(idStr)
 	if err != nil {
@@ -101,7 +114,7 @@ func (handler *MediaHandler) GetImageByIDHandler(w http.ResponseWriter, r *http.
 	json.NewEncoder(w).Encode(image)
 }
 
-func (handler *MediaHandler) SearchByTag(w http.ResponseWriter, r *http.Request) {
+func (handler *ImageHandler) SearchByTag(w http.ResponseWriter, r *http.Request) {
 	tagStr := r.PathValue("tagName")
 
 	if len(tagStr) == 0 {
@@ -118,7 +131,7 @@ func (handler *MediaHandler) SearchByTag(w http.ResponseWriter, r *http.Request)
 	json.NewEncoder(w).Encode(images)
 }
 
-func (h *MediaHandler) ServeImageFile(w http.ResponseWriter, r *http.Request) {
+func (h *ImageHandler) ServeImageFile(w http.ResponseWriter, r *http.Request) {
 	idStr := r.PathValue("fileID")
 
 	filePath := "./uploads/" + idStr + ".jpg"

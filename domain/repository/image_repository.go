@@ -7,7 +7,7 @@ import (
 	"github.com/google/uuid"
 )
 
-type MediaRepository interface {
+type ImageRepository interface {
 	//Read
 	GetAllImages(ctx context.Context) ([]*entity.Image, error)
 	GetImageByID(ctx context.Context, id uuid.UUID) (*entity.Image, error)

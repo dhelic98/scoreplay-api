@@ -18,11 +18,11 @@ func SetupRoutes(db *gorm.DB) *http.ServeMux {
 
 	//Create Services
 	tagService := &service.TagService{Respository: tagRepository}
-	imageService := &service.MediaService{Respository: imageRepository, TagRepository: tagRepository}
+	imageService := &service.ImageService{Respository: imageRepository}
 
 	//Create handlers
 	tagHandler := &handler.TagHandler{Service: tagService}
-	imageHandler := &handler.MediaHandler{Service: imageService}
+	imageHandler := &handler.ImageHandler{Service: imageService}
 
 	//Registering routes
 	registerTagRoutes(router, tagHandler)
@@ -42,10 +42,10 @@ func registerTagRoutes(router *http.ServeMux, tagHandler *handler.TagHandler) {
 	router.HandleFunc("POST /tags", tagHandler.CreateTagHandler)
 }
 
-func registerImageRoutes(router *http.ServeMux, mediaHandler *handler.MediaHandler) {
-	router.HandleFunc("GET /media", mediaHandler.GetAllImagesHandler)
-	router.HandleFunc("GET /media/{id}", mediaHandler.GetImageByIDHandler)
-	router.HandleFunc("POST /media", mediaHandler.CreateImageHandler)
-	router.HandleFunc("GET /media/filter/{tagName}", mediaHandler.SearchByTag)
-	router.HandleFunc("GET /media/file/{fileID}", mediaHandler.ServeImageFile)
+func registerImageRoutes(router *http.ServeMux, imageHandler *handler.ImageHandler) {
+	router.HandleFunc("GET /media", imageHandler.GetAllImagesHandler)
+	router.HandleFunc("GET /media/{id}", imageHandler.GetImageByIDHandler)
+	router.HandleFunc("POST /media", imageHandler.CreateImageHandler)
+	router.HandleFunc("GET /media/filter/{tagName}", imageHandler.SearchByTag)
+	router.HandleFunc("GET /media/file/{fileID}", imageHandler.ServeImageFile)
 }
