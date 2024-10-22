@@ -20,7 +20,7 @@ type MockTagService struct {
 	mock.Mock
 }
 
-func (mock *MockTagService) CreateTag(c context.Context, dto dto.CreateTagDTO) error {
+func (mock *MockTagService) CreateTag(c context.Context, dto *dto.CreateTagDTO) error {
 	args := mock.Called(dto.Name)
 	return args.Error(1)
 }

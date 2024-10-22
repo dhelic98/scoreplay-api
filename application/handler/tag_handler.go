@@ -33,7 +33,7 @@ func (handler *TagHandler) CreateTagHandler(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	if err := handler.Service.CreateTag(r.Context(), createTagdto); err != nil {
+	if err := handler.Service.CreateTag(r.Context(), &createTagdto); err != nil {
 		http.Error(w, "Failed to create tag", http.StatusInternalServerError)
 		return
 	}

@@ -11,7 +11,7 @@ import (
 )
 
 type ITagService interface {
-	CreateTag(ctx context.Context, createTagDto dto.CreateTagDTO) error
+	CreateTag(ctx context.Context, createTagDto *dto.CreateTagDTO) error
 	GetAllTags(ctx context.Context) ([]*dto.GetTagDTO, error)
 	GetTagById(ctx context.Context, id uuid.UUID) (*dto.GetTagDTO, error)
 	ParseMultipartFormToUUID(tagsJSONString string) ([]uuid.UUID, error)
@@ -25,7 +25,7 @@ func NewTagService(respository repository.TagRepository) *TagService {
 	return &TagService{Respository: respository}
 }
 
-func (tagService *TagService) CreateTag(ctx context.Context, createTagDto dto.CreateTagDTO) error {
+func (tagService *TagService) CreateTag(ctx context.Context, createTagDto *dto.CreateTagDTO) error {
 	tag := entity.Tag{
 		ID:   uuid.New(),
 		Name: createTagDto.Name,

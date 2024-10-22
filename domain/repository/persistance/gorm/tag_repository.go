@@ -37,11 +37,3 @@ func (repository *TagRepository) GetTagById(ctx context.Context, id uuid.UUID) (
 	}
 	return &tag, nil
 }
-
-func (repository *TagRepository) GetByIDs(ctx context.Context, ids []uuid.UUID) ([]entity.Tag, error) {
-	var tags []entity.Tag
-	if err := repository.DB.Where("id IN ?", ids).Find(&tags).Error; err != nil {
-		return nil, err
-	}
-	return tags, nil
-}
