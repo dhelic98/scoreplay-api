@@ -15,18 +15,18 @@ func SetupRoutes(db *gorm.DB) *http.ServeMux {
 
 	router := http.NewServeMux()
 	//Create repositories
-	imageRepository := &persistance.ImageRepository{DB: db}
-	tagRepository := &persistance.TagRepository{DB: db}
+	imageRepository := persistance.NewPostgresSQLImageRepository(db)
+	tagRepository := persistance.NewPostgresSQLTagRepository(db)
 
 	//Create Services
-	tagService := &service.TagService{Respository: tagRepository}
-	imageService := &service.ImageService{Respository: imageRepository}
-	fileService := &service.FileService{}
+	tagService := service.NewTagService(tagRepository)
+	imageService := service.NewImageService(imageRepository)
+	fileService := service.NewFileService()
 
 	//Create handlers
-	tagHandler := &handler.TagHandler{Service: tagService}
-	imageHandler := &handler.ImageHandler{ImageService: imageService, FileService: fileService}
-	fileHandler := &handler.FileHandler{FileService: fileService}
+	tagHandler := handler.NewTagHandler(tagService)
+	imageHandler := handler.NewImageHandler(imageService, tagService, fileService)
+	fileHandler := handler.NewFileHandler(fileService)
 
 	//Registering routes
 	registerTagRoutes(router, tagHandler)

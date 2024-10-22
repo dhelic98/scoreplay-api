@@ -10,6 +10,13 @@ import (
 	"github.com/google/uuid"
 )
 
+type ITagService interface {
+	CreateTag(ctx context.Context, createTagDto dto.CreateTagDTO) error
+	GetAllTags(ctx context.Context) ([]*dto.GetTagDTO, error)
+	GetTagById(ctx context.Context, id uuid.UUID) (*dto.GetTagDTO, error)
+	ParseMultipartFormToUUID(tagsJSONString string) ([]uuid.UUID, error)
+}
+
 type TagService struct {
 	Respository repository.TagRepository
 }

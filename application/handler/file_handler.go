@@ -8,7 +8,11 @@ import (
 )
 
 type FileHandler struct {
-	FileService *service.FileService
+	FileService service.IFileService
+}
+
+func NewFileHandler(fileService service.IFileService) *FileHandler {
+	return &FileHandler{FileService: fileService}
 }
 
 func (handler *FileHandler) ServeImageFile(w http.ResponseWriter, r *http.Request) {

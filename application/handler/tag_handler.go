@@ -12,7 +12,11 @@ import (
 )
 
 type TagHandler struct {
-	Service *service.TagService
+	Service service.ITagService
+}
+
+func NewTagHandler(tagService service.ITagService) *TagHandler {
+	return &TagHandler{Service: tagService}
 }
 
 func (handler *TagHandler) CreateTagHandler(w http.ResponseWriter, r *http.Request) {

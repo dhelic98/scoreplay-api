@@ -12,9 +12,13 @@ import (
 )
 
 type ImageHandler struct {
-	ImageService *service.ImageService
-	FileService  *service.FileService
-	TagService   *service.TagService
+	ImageService service.IImageService
+	FileService  service.IFileService
+	TagService   service.ITagService
+}
+
+func NewImageHandler(imageService service.IImageService, tagService service.ITagService, fileService service.IFileService) *ImageHandler {
+	return &ImageHandler{FileService: fileService, ImageService: imageService, TagService: tagService}
 }
 
 func (handler *ImageHandler) CreateImageHandler(w http.ResponseWriter, r *http.Request) {

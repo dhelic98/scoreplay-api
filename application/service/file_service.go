@@ -11,6 +11,11 @@ import (
 	"github.com/google/uuid"
 )
 
+type IFileService interface {
+	UploadFile(file *multipart.File, fileHeader *multipart.FileHeader) (string, error)
+	GetFilePath(fileName string) string
+}
+
 type FileService struct {
 }
 
@@ -42,8 +47,4 @@ func (fileService *FileService) UploadFile(file *multipart.File, fileHeader *mul
 
 func (fileService *FileService) GetFilePath(fileName string) string {
 	return fmt.Sprintf("./uploads/%s", fileName)
-}
-
-func (fileService *FileService) IsFileExtensionAllowed(fileExt string) {
-
 }

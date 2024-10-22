@@ -14,7 +14,7 @@ type GetTagDTO struct {
 	Name string    `json:"name"`
 }
 
-func ToTagDTO(tag entity.Tag) GetTagDTO {
+func ToTagDTO(tag *entity.Tag) GetTagDTO {
 	return GetTagDTO{
 		ID:   tag.ID,
 		Name: tag.Name,

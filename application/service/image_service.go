@@ -2,13 +2,19 @@ package service
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/dhelic98/scoreplay-api/application/dto"
 	"github.com/dhelic98/scoreplay-api/domain/entity"
 	"github.com/dhelic98/scoreplay-api/domain/repository"
 	"github.com/google/uuid"
 )
+
+type IImageService interface {
+	CreateImage(ctx context.Context, imageDTO *dto.CreateImageDTO) error
+	GetAllImages(ctx context.Context) ([]*dto.GetImageDTO, error)
+	GetImageById(ctx context.Context, id uuid.UUID) (*dto.GetImageDTO, error)
+	SearchImagesByTagName(ctx context.Context, tagName string) ([]*dto.GetImageDTO, error)
+}
 
 type ImageService struct {
 	Respository repository.ImageRepository
@@ -39,7 +45,6 @@ func (imageService *ImageService) CreateImage(ctx context.Context, imageDTO *dto
 func (imageService *ImageService) GetAllImages(ctx context.Context) ([]*dto.GetImageDTO, error) {
 	images, err := imageService.Respository.GetAllImages(ctx)
 	if err != nil {
-		fmt.Println("error in here ")
 		return nil, err
 	}
 
