@@ -21,6 +21,21 @@ func NewImageHandler(imageService service.IImageService, tagService service.ITag
 	return &ImageHandler{FileService: fileService, ImageService: imageService, TagService: tagService}
 }
 
+// CreateImageHandler creates a new media/image.
+//
+//	@Summary		Create a new image
+//	@Description	Create a new image with the specified name tags
+//	@Tags			images
+//	@Accept			mpfd
+//
+//	@Param			name	formData	string		true	"Image Name"
+//	@Param			tags	formData	[]string	true	"Array of tag IDs (e.g., tags=['id1','id2'])"
+//	@Param			image	formData	file		true	"The image file to upload"
+//
+//	@Success		201
+//	@Failure		400
+//	@Failure		500
+//	@Router			/media [post]
 func (handler *ImageHandler) CreateImageHandler(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseMultipartForm(10 << 20)
 	if err != nil {
@@ -78,10 +93,18 @@ func (handler *ImageHandler) CreateImageHandler(w http.ResponseWriter, r *http.R
 	w.WriteHeader(http.StatusCreated)
 }
 
+// GetAllImagesHandler get all images.
+//
+//	@Summary	Get all image entities
+//	@Tags		images
+//	@Produce	json
+//	@Success	200
+//	@Failure	500
+//	@Router		/media [get]
 func (handler *ImageHandler) GetAllImagesHandler(w http.ResponseWriter, r *http.Request) {
 	images, err := handler.ImageService.GetAllImages(r.Context())
 	if err != nil {
-		http.Error(w, "Images not found", http.StatusNotFound)
+		http.Error(w, "Images not found", http.StatusInternalServerError)
 		return
 	}
 
@@ -89,6 +112,18 @@ func (handler *ImageHandler) GetAllImagesHandler(w http.ResponseWriter, r *http.
 	json.NewEncoder(w).Encode(images)
 }
 
+// GetImageByIDHandler get images by UUID.
+//
+//	@Summary	Get images by ID
+//	@Tags		images
+//	@Produce	json
+//
+//	@Param		id	path	string	true	"Image UUID"
+//
+//	@Success	200
+//	@Failure	400
+//	@Failure	404
+//	@Router		/media/{id} [get]
 func (handler *ImageHandler) GetImageByIDHandler(w http.ResponseWriter, r *http.Request) {
 	idStr := r.PathValue("id")
 	id, err := uuid.Parse(idStr)
@@ -107,7 +142,19 @@ func (handler *ImageHandler) GetImageByIDHandler(w http.ResponseWriter, r *http.
 	json.NewEncoder(w).Encode(image)
 }
 
-func (handler *ImageHandler) SearchByTag(w http.ResponseWriter, r *http.Request) {
+// SearchByTagHandler get images by Tag name.
+//
+//	@Summary	Get images by tag name
+//	@Tags		images
+//	@Produce	json
+//
+//	@Param		tagName	path	string	true	"Tag name"
+//
+//	@Success	200
+//	@Failure	400
+//	@Failure	404
+//	@Router		/media/filter/{tagName} [get]
+func (handler *ImageHandler) SearchByTagHandler(w http.ResponseWriter, r *http.Request) {
 	tagStr := r.PathValue("tagName")
 
 	if len(tagStr) == 0 {

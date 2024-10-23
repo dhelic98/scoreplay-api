@@ -177,7 +177,7 @@ func TestSearchByTag(t *testing.T) {
 	req.SetPathValue("tagName", "some tag")
 
 	rr := httptest.NewRecorder()
-	handler.SearchByTag(rr, req)
+	handler.SearchByTagHandler(rr, req)
 
 	assert.Equal(t, http.StatusOK, rr.Code)
 

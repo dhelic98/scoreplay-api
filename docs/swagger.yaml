@@ -1,0 +1,151 @@
+basePath: /v1
+definitions:
+  dto.CreateTagDTO:
+    properties:
+      name:
+        type: string
+    required:
+    - name
+    type: object
+host: localhost:4200
+info:
+  contact: {}
+  description: Simple REST API for CRUD operations on Media and Tag entities.
+  title: Scoreplay Media API
+  version: "1.0"
+paths:
+  /media:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "500":
+          description: Internal Server Error
+      summary: Get all image entities
+      tags:
+      - images
+    post:
+      consumes:
+      - multipart/form-data
+      description: Create a new image with the specified name tags
+      parameters:
+      - description: Image Name
+        in: formData
+        name: name
+        required: true
+        type: string
+      - collectionFormat: csv
+        description: Array of tag IDs (e.g., tags=['id1','id2'])
+        in: formData
+        items:
+          type: string
+        name: tags
+        required: true
+        type: array
+      - description: The image file to upload
+        in: formData
+        name: image
+        required: true
+        type: file
+      responses:
+        "201":
+          description: Created
+        "400":
+          description: Bad Request
+        "500":
+          description: Internal Server Error
+      summary: Create a new image
+      tags:
+      - images
+  /media/{id}:
+    get:
+      parameters:
+      - description: Image UUID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+        "404":
+          description: Not Found
+      summary: Get images by ID
+      tags:
+      - images
+  /media/filter/{tagName}:
+    get:
+      parameters:
+      - description: Tag name
+        in: path
+        name: tagName
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+        "404":
+          description: Not Found
+      summary: Get images by tag name
+      tags:
+      - images
+  /tags:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "500":
+          description: Internal Server Error
+      summary: Get all tags
+      tags:
+      - tags
+    post:
+      consumes:
+      - application/json
+      description: Create a new tag with the specified name
+      parameters:
+      - description: CreateTagDTO
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateTagDTO'
+      responses:
+        "201":
+          description: Created
+        "400":
+          description: Bad Request
+      summary: Create a new tag
+      tags:
+      - tags
+  /tags/{id}:
+    get:
+      parameters:
+      - description: Tag UUID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "500":
+          description: Internal Server Error
+      summary: Get tag by ID
+      tags:
+      - tags
+swagger: "2.0"

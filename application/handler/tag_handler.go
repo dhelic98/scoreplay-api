@@ -19,6 +19,18 @@ func NewTagHandler(tagService service.ITagService) *TagHandler {
 	return &TagHandler{Service: tagService}
 }
 
+// CreateTagHandler creates a new tag.
+//
+//	@Summary		Create a new tag
+//	@Description	Create a new tag with the specified name
+//	@Tags			tags
+//	@Accept			json
+//
+// @Param request body dto.CreateTagDTO  true "CreateTagDTO"
+//
+//	@Success		201
+//	@Failure		400
+//	@Router			/tags [post]
 func (handler *TagHandler) CreateTagHandler(w http.ResponseWriter, r *http.Request) {
 	var createTagdto dto.CreateTagDTO
 
@@ -41,6 +53,14 @@ func (handler *TagHandler) CreateTagHandler(w http.ResponseWriter, r *http.Reque
 	w.WriteHeader(http.StatusCreated)
 }
 
+// GetAllTagsHandler get all tags.
+//
+//	@Summary	Get all tags
+//	@Tags		tags
+//	@Produce	json
+//	@Success	200
+//	@Failure	500
+//	@Router		/tags [get]
 func (handler *TagHandler) GetAllTagsHandler(w http.ResponseWriter, r *http.Request) {
 	tags, err := handler.Service.GetAllTags(r.Context())
 	if err != nil {
@@ -53,6 +73,17 @@ func (handler *TagHandler) GetAllTagsHandler(w http.ResponseWriter, r *http.Requ
 
 }
 
+// GetTagByIDHandler fetch tag by it's UUID.
+//
+//	@Summary	Get tag by ID
+//	@Tags		tags
+//	@Produce	json
+//
+// @Param 	id path string  true "Tag UUID"
+//
+//	@Success	200
+//	@Failure	500
+//	@Router		/tags/{id} [get]
 func (handler *TagHandler) GetTagByIDHandler(w http.ResponseWriter, r *http.Request) {
 	idStr := r.PathValue("id")
 	id, err := uuid.Parse(idStr)

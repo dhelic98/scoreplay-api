@@ -10,6 +10,6 @@ func registerImageRoutes(router *http.ServeMux, imageHandler *handler.ImageHandl
 	router.HandleFunc("GET /media", imageHandler.GetAllImagesHandler)
 	router.HandleFunc("GET /media/{id}", imageHandler.GetImageByIDHandler)
 	router.HandleFunc("POST /media", imageHandler.CreateImageHandler)
-	router.HandleFunc("GET /media/filter/{tagName}", imageHandler.SearchByTag)
+	router.HandleFunc("GET /media/filter/{tagName}", imageHandler.SearchByTagHandler)
 
 }

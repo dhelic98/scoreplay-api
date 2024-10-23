@@ -15,6 +15,17 @@ func NewFileHandler(fileService service.IFileService) *FileHandler {
 	return &FileHandler{FileService: fileService}
 }
 
+// ServeImageFile serves image file
+//
+//	@Summary	Get image file by image UUID
+//	@Produce	png
+//	@Produce	jpeg
+//
+//	@Param		fileID	path	string	true	"Image file UUID"
+//
+//	@Tags		files
+//	@Success	200
+//	@Failure	404
 func (handler *FileHandler) ServeImageFile(w http.ResponseWriter, r *http.Request) {
 	idStr := r.PathValue("fileID")
 
